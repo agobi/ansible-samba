@@ -86,3 +86,5 @@ samba_users:
     # Define samba user password
     smbpasswd: 'P@55w0rd'
 samba_workgroup: 'EXAMPLE'
+
+samba_config: /usr/local/etc/smb4.conf

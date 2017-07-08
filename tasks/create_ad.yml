@@ -1,0 +1,26 @@
+---
+- name: config_samba | configuring samba
+  template:
+    src: "{{ item.template }}.j2"
+    dest: "/{{ item.name }}"
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+  notify:
+    - restart samba
+  with_items:
+    - template: etc/krb5.conf
+      name: 'etc/krb5.conf'
+
+- name: config_samba | configuring Active Directory
+  shell: >
+    samba-tool domain provision \
+       --realm={{ samba_ad_info['kerberos_realm']|upper }} \
+       --domain={{ samba_ad_info['netbios_domain_name']|upper }} \
+       --adminpass='{{ samba_ad_info['adminpass'] }}' \
+       --server-role='domain controller' \
+       --use-rfc2307
+  register: samba_tool_cmd
+  failed_when: samba_tool_cmd.rc != 0
+  args:
+    creates: "{{ samba_config }}"
