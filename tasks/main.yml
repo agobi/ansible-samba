@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible-samba
 - name: Install samba
-  pkgng: name=samba46 state=present
+  pkgng: name=samba44 state=present
 
 - name: Enable samba
   sysrc: name=samba_server_enable value="YES"
