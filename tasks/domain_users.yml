@@ -1,10 +1,37 @@
 ---
+#- name: domain_users | generate list of groups
+#- name: set up domain users
+#  shell: |
+#    (sed -e 's/^\ //' | ldbmodify -H /var/db/samba4/private/sam.ldb) <<EOF
+#    dn: CN=Domain Users,CN=Users,DC=ad,DC=wendrinet,DC=lan
+#    changeType: modify
+#    add: gidNumber
+#    gidNumber: 10000
+#    EOF
+#  failed_when: a.stderr
+#  register: a
+#
+#- debug: var=a
+
 - name: domain_users | generate list of users
   command: "samba-tool user list"
   register: domain_users
+  changed_when: false
 
 - name: domain_users | creating domain users
-  command: "samba-tool user add {{ item['name'] }} '{{ item['password'] }}'"
+  command: |
+    samba-tool user create {{ item['name'] }} '{{ samba_passwords[item['name']] }}' \
+    {% if item['samba-uid'] is defined %}
+      --nis-domain {{ samba_ad_info['netbios_domain_name']|upper }} \
+      --uid-number {{ item['samba-uid'] }}
+      --gid-number {{ item['samba-gid'] | default(item['samba-uid']) }}
+      --login-shell {{ item['shell'] }}
+      --unix-home {{ item['samba-home'] | default('/h/%s' % item['name']) }}
+      --given-name {{ item['firstname'] }}
+      --surname {{ item['surname'] }}
+      --mail-address {{ item['email'] }}
+    {% endif %}
+
 #  ignore_errors: true   #defined for now to get around potential bug in failed_when conditionals
   with_items: '{{ samba_domain_users }}'
   when: item['name'] not in domain_users['stdout']
