@@ -1,0 +1,28 @@
+# Global parameters
+[global]
+   netbios name = {{ ansible_hostname|upper }}
+   workgroup = {{ samba_ad_info['netbios_domain_name'] |upper }}
+   realm = AD.WENDRINET.LAN
+   server role = {{ samba_server_role }}
+
+
+#======================= Share Definitions =======================
+
+{% if samba_shares is defined %}
+#======================= Share Definitions =======================
+
+{%   for item in samba_shares %}
+[{{ item.name }}]
+browsable = {{ item.browsable|lower }}
+guest ok = {{ item.guest_ok|lower }}
+path = {{ samba_share_path }}/{{ item.name }}
+{%     if item.read_only is defined %}
+read only = {{ item.read_only|lower }}
+{%     endif %}
+{%     if item.valid_users is defined %}
+valid users = {{ item.valid_users }}
+{%     endif %}
+writable = {{ item.writable|lower }}
+
+{%   endfor %}
+{% endif %}

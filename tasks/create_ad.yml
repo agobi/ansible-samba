@@ -1,16 +1,16 @@
 ---
-- name: config_samba | configuring samba
-  template:
-    src: "{{ item.template }}.j2"
-    dest: "/{{ item.name }}"
-    owner: root
-    group: "{{ root_group }}"
-    mode: 0644
-  notify:
-    - restart samba
-  with_items:
-    - template: etc/krb5.conf
-      name: 'etc/krb5.conf'
+#- name: config_samba | configuring samba
+#  template:
+#    src: "{{ item.template }}.j2"
+#    dest: "/{{ item.name }}"
+#    owner: root
+#    group: "{{ root_group }}"
+#    mode: 0644
+#  notify:
+#    - restart samba
+#  with_items:
+#    - template: etc/krb5.conf
+#      name: 'etc/krb5.conf'
 
 - name: config_samba | configuring Active Directory
   shell: >
