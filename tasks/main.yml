@@ -6,18 +6,33 @@
 - name: Enable samba
   sysrc: name=samba_server_enable value="YES"
 
+- name: Configure hosts file
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_default_ipv4.address }} {{ ansible_hostname }}.{{ samba_ad_info['kerberos_realm']|lower }} {{ ansible_hostname }}"
+    regexp: "{{ ansible_hostname }}.{{ samba_ad_info['kerberos_realm']|lower }}"
+    insertafter: ^127\.0\.0\.1
+
 - include: create_ad.yml
   when: samba_create_domain_controller
 
-#
-#- include: samba_groups.yml
-#
-#- include: samba_users.yml
-#
-#- include: create_shares.yml
+- name: Configure resolver
+  when: samba_ad_info['ad_dns_ip'] is defined
+  lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ samba_ad_info['ad_dns_ip'] }}"
+    regexp: ^nameserver
+    insertafter: ^search
+
+
+- include: config_samba.yml
+  when: not samba_create_domain_controller
+
+- include: create_shares.yml
 
 - name: Start samba
   service: name=samba_server state=started
 
-
 - include: domain_users.yml
+  when: samba_create_domain_controller
+  tags: users

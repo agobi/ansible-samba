@@ -12,15 +12,25 @@
 #    - template: etc/krb5.conf
 #      name: 'etc/krb5.conf'
 
-- name: config_samba | configuring Active Directory
+- name: create_ad | configuring Active Directory
   shell: >
     samba-tool domain provision \
        --realm={{ samba_ad_info['kerberos_realm']|upper }} \
        --domain={{ samba_ad_info['netbios_domain_name']|upper }} \
        --adminpass='{{ samba_ad_info['adminpass'] }}' \
        --server-role='domain controller' \
-       --use-rfc2307
+       --use-rfc2307 \
+       --option='dns forwarder = {{ samba_ad_info['dns_forwarder'] }}'
   register: samba_tool_cmd
   failed_when: samba_tool_cmd.rc != 0
   args:
     creates: "{{ samba_config }}"
+
+- name: create_ad | configuring kerberos
+  file:
+    src: /var/db/samba4/private/krb5.conf
+    dest: /etc/krb5.conf
+    state: link
+
+- name: create_ad | Set password age
+  command:  samba-tool domain passwordsettings set --min-pwd-age=0 --max-pwd-age=0

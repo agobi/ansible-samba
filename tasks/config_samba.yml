@@ -13,3 +13,11 @@
       name: /etc/krb5.conf
     - template: smb.conf.j2
       name: /usr/local/etc/smb4.conf
+
+- name: join domain | configuring samba
+  when: samba_server_role == "member server"
+  shell: |
+    net join {{ samba_ad_info['kerberos_realm'] }} -U Administrator%{{ samba_ad_info['adminpass'] }} && \
+    touch /var/db/samba4/.ansible-joined
+  args:
+    creates: /var/db/samba4/.ansible-joined
