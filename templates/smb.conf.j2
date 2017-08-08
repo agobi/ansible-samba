@@ -1,10 +1,20 @@
 # Global parameters
 [global]
-   netbios name = {{ ansible_hostname|upper }}
-   workgroup = {{ samba_ad_info['netbios_domain_name'] |upper }}
-   realm = AD.WENDRINET.LAN
-   server role = {{ samba_server_role }}
+  netbios name = {{ ansible_hostname|upper }}
+  workgroup = {{ samba_ad_info['netbios_domain_name'] |upper }}
+  realm = {{ samba_ad_info['kerberos_realm']|upper }}
+  server role = {{ samba_server_role }}
 
+  kerberos method = secrets and keytab
+  idmap config * : backend = tdb
+  idmap config * : range = 1000-9999
+  idmap config {{ samba_ad_info['netbios_domain_name'] |upper }}:backend = ad
+  idmap config {{ samba_ad_info['netbios_domain_name'] |upper }}:schema_mode = rfc2307
+  idmap config {{ samba_ad_info['netbios_domain_name'] |upper }}:range = 10000-999999
+  #idmap config WENDRINET : unix_nss_info = yes
+  template shell = /bin/bash
+  template homedir = /h/%U
+  winbind use default domain = yes
 
 #======================= Share Definitions =======================
 

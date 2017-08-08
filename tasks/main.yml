@@ -30,7 +30,7 @@
 
 - include: create_shares.yml
 
-- name: Start samba
+- name: Make sure samba is started
   service: name=samba_server state=started
 
 - include: domain_users.yml

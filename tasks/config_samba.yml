@@ -21,3 +21,14 @@
     touch /var/db/samba4/.ansible-joined
   args:
     creates: /var/db/samba4/.ansible-joined
+
+- name: Enable samba
+  sysrc: name=winbindd_enable value="YES"
+  notify:
+    - restart samba
+
+- name: enable nscd | configuring samba
+  sysrc: name=nscd_enable value=YES
+
+- name: start nscd | configuring samba
+  service: name=nscd state=started
